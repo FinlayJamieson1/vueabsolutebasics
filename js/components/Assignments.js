@@ -3,22 +3,26 @@ import assignmentCreate from "./AssignmentCreate.js";
 export default {
     components: { assignmentList, assignmentCreate },
     template: `
-<section class="space-y-6">
-  <assignment-list :assignments="filters.inProgress" title="In Progress"></assignment-list>
+<section class="flex gap-8">
+  <assignment-list :assignments="filters.inProgress" title="In Progress">
+    <assignment-create @add="add"></assignment-create>
+  </assignment-list>
 
-  <assignment-list :assignments="filters.Completed" title="Completed Assignments"></assignment-list>
-  
-  <assignment-create @add="add"></assignment-create>
+  <assignment-list 
+      v-if="showCompleted"
+      :assignments="filters.Completed" 
+      title="Completed" 
+      can-toggle
+      @toggle="showCompleted = ! showCompleted"
+  >
+  </assignment-list>
 </section>
 `,
 
     data() {
         return {
-            assignments: [
-                { name: 'Finish Project', complete: false, id: 1 },
-                { name: 'Read Chapter 4', complete: false, id: 2 },
-                { name: 'Turn in Homework', complete: false, id:3 }
-            ],
+            assignments: [],
+            showCompleted: true
         }
     },
 
@@ -30,6 +34,14 @@ export default {
 
             };
         }
+    },
+
+    created() {
+      fetch('http://localhost:3000/assignments')
+          .then(response => response.json())
+          .then(assignments => {
+              this.assignments = assignments;
+          });
     },
 
     methods: {
